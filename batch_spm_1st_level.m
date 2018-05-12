@@ -1,0 +1,123 @@
+function [spm_1st_level_matName matlabbatch] = batch_spm_1st_level(userParams)
+
+
+
+%% default model parameters
+
+matlabbatch{1}.spm.stats.fmri_spec.fact             = struct('name', {}, 'levels', {});
+matlabbatch{1}.spm.stats.fmri_spec.bases.hrf.derivs = [0 0];
+matlabbatch{1}.spm.stats.fmri_spec.volt             = 1;
+matlabbatch{1}.spm.stats.fmri_spec.global           = 'None';
+matlabbatch{1}.spm.stats.fmri_spec.mthresh          = 0.8;
+matlabbatch{1}.spm.stats.fmri_spec.cvi              = 'AR(1)';
+
+%% user defined model parameters
+matlabbatch{1}.spm.stats.fmri_spec.timing.units = userParams.Units;
+matlabbatch{1}.spm.stats.fmri_spec.timing.RT = userParams.RT_time;
+matlabbatch{1}.spm.stats.fmri_spec.mask = {[userParams.mask_folder userParams.mask_file ',1']};
+matlabbatch{1}.spm.stats.fmri_spec.dir = {userParams.results_dir};
+
+
+%% Specify images and order files
+
+% loop through each 4D nifti image in the imageList
+for run = 1:numel(userParams.imageList)
+    
+    %get number of timepoints in current run
+    Pulse_Numb = numel(spm_vol(char(userParams.imageList(run))));
+    
+    %loop through each timepoint and assign an image
+    for TRnumb = 1:Pulse_Numb
+        matlabbatch{1}.spm.stats.fmri_spec.sess(run).scans{TRnumb,1} = [char(userParams.imageList(run)) ',' num2str(TRnumb)];
+    end
+    
+    
+    matlabbatch{1}.spm.stats.fmri_spec.sess(run).hpf = userParams.hpf;
+    
+    % Generate timing files based on a function that should be adapted from
+    % paradigm to paradigm!
+    
+    matlabbatch{1}.spm.stats.fmri_spec.sess(run).multi = {char(userParams.orderList(run))};
+end
+
+%% add motion regressor 
+    
+    if userParams.motion_reg == 1;
+     
+      %loop through each run  
+      for run = 1:numel(matlabbatch{1}.spm.stats.fmri_spec.sess)
+
+        %load realignment mat files  
+        realignment_matFile = char(userParams.mot_regList{run});
+        load(realignment_matFile);
+        
+        %convert to text file
+        realignment_txtFile = [char(userParams.mot_regList{1}(1:end-4)),'.txt'];
+        dlmwrite(realignment_txtFile,corr_pre'-1,'delimiter','\t');
+        
+        %check if realignment txt files contains the correct number of
+        %dataPoints
+        if length(corr_pre) ~= Pulse_Numb;
+           error(['Motion regressor parameters for ' char(userParams.imageList(run)) ' are not correct!'])
+        end
+        
+        %add txt file name to regressors 
+        matlabbatch{1}.spm.stats.fmri_spec.sess(run).multi_reg = {realignment_txtFile};
+        
+        
+      end
+      
+      %string for batchFile naming
+        motion_str = 'motReg';
+        
+    else
+        motion_str = 'no_motReg';
+    end
+    
+%% add glm denoise pca regressors     
+if userParams.pca_regNow == 1
+
+    % Combine denoise and motion regressor columns
+    for run = 1:numel(matlabbatch{1}.spm.stats.fmri_spec.sess)
+
+        %load motion regressor
+        txt_file{run} = char(matlabbatch{1}.spm.stats.fmri_spec.sess(run).multi_reg);
+        txt_data{run} = load(txt_file{run});
+
+        %load pca regressor file
+        pca_reg_file{run} = load(char(userParams.pca_regList{run}));
+
+        % create new regressor file combining motion regressor 
+        % and pca regressor
+        clear multi_reg_file
+        multi_reg_file = [txt_data{run} pca_reg_file{run}];
+        multi_reg_fileName = sprintf([userParams.motion_dir,'/','multi_reg_run%02.0f.txt'],run);
+
+        dlmwrite(multi_reg_fileName,multi_reg_file,'delimiter',' ');
+
+        matlabbatch{1}.spm.stats.fmri_spec.sess(run).multi_reg = {multi_reg_fileName};
+    end
+
+        %string for batchFile naming
+        pca_str = 'pcaReg';
+else
+        pca_str = 'no_pcaReg';
+
+end
+
+
+%% if no results directory; make results directory
+if ~exist(userParams.results_dir)
+    mkdir(userParams.results_dir);
+end
+
+%% generate batch file name and save matlabbatch
+a=datestr(clock,31);   
+time_stamp = [a(3:4) a(6:7) a(9:10) '_' a(12:13) 'h' a(15:16)];
+
+spm_1st_level_matName = ['batch_',char(userParams.monkeyNameDate),'_',time_stamp,'_',motion_str,'_',pca_str,'.mat'];
+spm_1st_level_matName = fullfile(userParams.results_dir,'..',spm_1st_level_matName);
+
+save(spm_1st_level_matName,'matlabbatch')
+
+    
