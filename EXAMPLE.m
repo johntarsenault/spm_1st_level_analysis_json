@@ -1,43 +1,43 @@
-spm_1st_level_analysis_path = '/mnt/.autofs/storage/gbw-s-neu01_fmri-monkey-03/PROJECT/John/code/fmri_basics/spm_1st_level_analysis_json/';
-spm_to_GLMdenoise_path = '/mnt/.autofs/storage/gbw-s-neu01_fmri-monkey-03/PROJECT/John/code/fmri_basics/spm_to_GLMdenoise/';
+%% specify user parameters
+% javaaddpath('iText-4.2.0-com.itextpdf.jar')
+
+spm_1st_level_analysis_path = '/data/code/spm_1st_level_analysis_json/';
+spm_to_GLMdenoise_path = '/data/code/spm_to_GLMdenoise/';
 
 addpath(spm_1st_level_analysis_path);
 addpath(spm_to_GLMdenoise_path);
-%% specify user parameters
 
 %%% specify directories
-userParams.rootDir = '/data/fmri_monkey_03/PROJECT/John/TIL/ANALYSIS/Dozer161012/';
+userParams.rootDir = '/data/examples/fmri/tank180425/';
 userParams.results_dir = fullfile([userParams.rootDir, 'test_results', '/']);
 
 %%%% specify template and monkey name & mask
-userParams.templateSpace = "Dozer";
-userParams.monkeyNameDate = "Dozer161012";
-userParams.mask_folder = '/data/fmri_monkey_03/PROJECT/John/TIL/TEMPLATE_DOZER/';
-userParams.mask_file = 'Dozer_Anat_1mm_Mask_Crop.nii';
+userParams.mask_file = '/data/examples/template/tank/tank_anat.nii';
 
 %%% model params
 userParams.RT_time = 2; % in seconds (usually 2s)
 userParams.Units = 'scans'; % can either be scans or secs
-userParams.Pulse_Numb = 300; % number of TR pulses for each run (length of run in scans)
+userParams.Pulse_Numb = 450; % number of TR pulses for each run (length of run in scans)
 userParams.hpf = 128; % high-pass filter, SPM default: 128
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+pdf_file_name = '/data/examples/fmri/20180425_Datasheets_Scanner_Tank180425.pdf';
+nifti_json_dir = '/data/examples/fmri/tank180425/funct/_7_fsl_smooth_preproc/';
+spm_order_dir = '/data/examples/fmri/tank180425_spm/';
+
+assign_order_file_to_json_all(pdf_file_name, json_dir, spm_order_dir);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %specify image info
-nifti_dir{1} = '/mnt/.autofs/storage/gbw-s-neu01_fmri-monkey-03/PROJECT/Sjoerd/FaceBody_Discrimination/fMRI/daily_fMRI_results/tank180425/kanade/funct/_4_slice_by_slice_lucas_kanade/';
-nifti_dir{2} = '/mnt/.autofs/storage/gbw-s-neu01_fmri-monkey-03/PROJECT/Sjoerd/FaceBody_Discrimination/fMRI/daily_fMRI_results/tank180425/kanade/funct/_3_slice_timing_afni_alt_z2_preproc/';
+nifti_dir{1} = '/data/examples/fmri/tank180425/funct/_7_fsl_smooth_preproc/';
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 userParams.imageList = get_imageList_from_nifti_dir(nifti_dir);
+userParams.orderList = get_orderList_from_imageList(userParams.imageList);
+userParams.mot_regList = get_motion_regList_from_imageList(userParams.imageList);
 
-clear imageList
-imageList{1} = '/mnt/.autofs/storage/gbw-s-neu01_fmri-monkey-03/PROJECT/Sjoerd/FaceBody_Discrimination/fMRI/daily_fMRI_results/tank180423/kanade/funct/_7_fsl_smooth_preproc/Tank180423_IMA_23a_r_st_mr_nr_s.nii';
-userParams.orderList = get_orderList_from_nifti_dir(userParams.imageList);
-
-%specify order info
-userParams.order_dir = fullfile([userParams.rootDir, 'Dozer161012_SPM_Files', '/']);
-userParams.order_number = [2:3];
-
-%%% specify motion regressor info
-userParams.motion_reg = 1; % 1 = use motion regressors, 0 = do not use motion regressors
-userParams.motion_dir = userParams.image_dir;
-userParams.motion_number = [10:11];
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%% specify regressors to use
 userParams.pca_reg_calc = 0; % 1 = calc pca using glm_dneoise, 0 = do not calc pca regressors
