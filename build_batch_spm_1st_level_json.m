@@ -4,7 +4,6 @@ function [spm_1st_level_matName, matlabbatch] = build_batch_spm_1st_level_json(u
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% build pca regressor list
-userParams.pca_regNow = 0; %ensures pca regressor is not added to model until it is calculated
 
 if userParams.pca_reg_calc == 1
     

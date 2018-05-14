@@ -68,7 +68,7 @@ else
 end
 
 %% add glm denoise pca regressors
-if userParams.pca_regNow == 1
+if userParams.pca_reg == 1
     
     % Combine denoise and motion regressor columns
     for run = 1:numel(matlabbatch{1}.spm.stats.fmri_spec.sess)
@@ -84,7 +84,7 @@ if userParams.pca_regNow == 1
         % and pca regressor
         clear multi_reg_file
         multi_reg_file = [txt_data{run}, pca_reg_file{run}];
-        multi_reg_fileName = sprintf([userParams.motion_dir, '/', 'multi_reg_run%02.0f.txt'], run);
+        multi_reg_fileName = sprintf([userParams.baseDir, '/funct/regressor/', 'multi_reg_run%02.0f.txt'], run);
         
         dlmwrite(multi_reg_fileName, multi_reg_file, 'delimiter', ' ');
         
