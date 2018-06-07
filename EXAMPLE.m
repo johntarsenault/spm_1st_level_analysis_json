@@ -6,7 +6,7 @@ addpath(genpath(spm_1st_level_analysis_path));
 addpath(spm_to_GLMdenoise_path);
 
 %% specify directories
-userParams.baseDir = '/data/fmri_monkey_03/PROJECT/Sjoerd/FaceBody_Discrimination/fMRI/daily_fMRI_results/tank180425/kanade/';
+userParams.baseDir = '/data/fmri_monkey_03/PROJECT/Sjoerd/FaceBody_Discrimination/fMRI/daily_fMRI_results/tank180606/';
 userParams.niftiDir = fullfile(userParams.baseDir, 'funct/_7_fsl_smooth_preproc/')
 userParams.results_dir = fullfile(userParams.baseDir, '/test_results/');
 
@@ -34,6 +34,8 @@ userParams.mot_regList = get_motion_regList_from_imageList(userParams.imageList)
 % build pca regressors
 userParams.pca_reg_calc = 0; % 1 = calc pca using glm_dneoise, 0 = do not calc pca regressors
 userParams.pca_reg = 1; % 1 = use pca regressors, 0 = do not use pca regressors
+userParams.pca_reg_mean_reg_no = 1; % if regressors have different optimum # of regressors (e.g. analysis across days) 
+                                    % specified use the mean # regressors rounded.
 
 %%% specify contrasts
 

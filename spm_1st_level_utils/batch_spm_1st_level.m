@@ -50,9 +50,13 @@ if userParams.motion_reg == 1;
         
         %check if realignment txt files contains the correct number of
         %dataPoints
+        
         if size(realignment_matFile, 1) ~= Pulse_Numb;
+            realignment_matFile = realignment_matFile';
+            if size(realignment_matFile, 1) ~= Pulse_Numb;
             error(['Motion regressor parameters for ', char(userParams.imageList(run)), ' are not correct!'])
-        end
+            end
+            end
         
         %add txt file name to regressors
         matlabbatch{1}.spm.stats.fmri_spec.sess(run).multi_reg = {realignment_txtFile};
@@ -77,12 +81,18 @@ if userParams.pca_reg == 1
         txt_file{run} = char(matlabbatch{1}.spm.stats.fmri_spec.sess(run).multi_reg);
         txt_data{run} = load(txt_file{run});
         
+        % if vector is column sorted instead of row sorted rotate
+        if size(txt_data{run},1) == 1
+            txt_data{run} = txt_data{run}';
+        end
+        
         %load pca regressor file
         pca_reg_file{run} = load(char(userParams.pca_regList{run}));
         
         % create new regressor file combining motion regressor
         % and pca regressor
         clear multi_reg_file
+        
         multi_reg_file = [txt_data{run}, pca_reg_file{run}];
         multi_reg_fileName = sprintf([userParams.baseDir, '/funct/regressor/', 'multi_reg_run%02.0f.txt'], run);
         
