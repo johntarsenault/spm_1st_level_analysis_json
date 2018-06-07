@@ -22,7 +22,7 @@ switch num_regressors
         mean_num_pca_regressors = round(mean(num_pca_regressors_array));
         
         for i_images = 1:numel(imageList)
-            pca_regList{i_images} = get_pca_regressor_from_json(jsonList{i_images});
+            pca_regList{i_images} = get_pca_regressor_from_json_mean(jsonList{i_images},mean_num_pca_regressors);
         end
         
         
