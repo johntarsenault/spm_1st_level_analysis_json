@@ -93,7 +93,15 @@ if userParams.pca_reg == 1
         % and pca regressor
         clear multi_reg_file
         
+        
+        % check if directory exists if not then create
+        new_motion_dir = fullfile(userParams.baseDir, '/funct/regressor/')
+        if ~exist(new_motion_dir)
+            mkdir(new_motion_dir)
+        end
+        
         multi_reg_file = [txt_data{run}, pca_reg_file{run}];
+        
         multi_reg_fileName = sprintf([userParams.baseDir, '/funct/regressor/', 'multi_reg_run%02.0f.txt'], run);
         
         dlmwrite(multi_reg_fileName, multi_reg_file, 'delimiter', ' ');
